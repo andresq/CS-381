@@ -1,4 +1,4 @@
-#### Projects from CS381 - Computer Vision
+### Projects from CS381 - Computer Vision
 * Project 1: Print histogram
 * Project 2: Automatic Threshold Selection
 * Project 3: 3x3 Filters
