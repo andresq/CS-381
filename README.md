@@ -5,3 +5,4 @@
 * Project 4: Morphology Operations
 * Project 5: Edge Detection
 * Project 6: Running Length encoding (Methods 1 & 4)
+* Project 7: Distance Transforming
