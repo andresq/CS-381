@@ -6,3 +6,4 @@
 * Project 5: Edge Detection
 * Project 6: Connected Componenets 
 * Project 7: Distance Transforming
+* Project 8: Thinning
