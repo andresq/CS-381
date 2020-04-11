@@ -7,3 +7,4 @@
 * Project 6: Connected Componenets 
 * Project 7: Distance Transforming
 * Project 8: Thinning
+* Project 9: Hough Transform
