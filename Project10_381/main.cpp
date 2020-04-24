@@ -129,28 +129,22 @@ class ChainCode{
         for(int iRow = CC.minRow+1; iRow < CC.maxRow+2; iRow++){
             for(int jCol = CC.minCol+1; jCol < CC.maxCol+2; jCol++){
                 if(CCAry[iRow][jCol] == label && !found){
-                    ChainCodeFile << label << " " << iRow << " " << jCol << " " << CCAry[iRow][jCol];
-                    debugFile     << label << " " << iRow << " " << jCol << " " << CCAry[iRow][jCol];
+                    ChainCodeFile << label << " " << iRow << " " << jCol << " " ;
+                    debugFile     << label << " " << iRow << " " << jCol << endl ;
                     startP = Point(iRow, jCol);
                     currentP = Point(iRow, jCol);
                     lastQ = 4;
                     found = true;
-
-                    //DEBUGSTUFF
-                    // debugFile << "Starting a new CC" << endl;
                 }
             }
         }
 
         int debugCount = 0;
-        int doOnce = 1;
+        int doOnce = 1; // at the begining the currentP and startP are the same
         int nextQ;
 
         while(doOnce > 0 ||  !(currentP.isEqual(startP))   ){
             doOnce = 0;
-
-            
-
             pChainDir = findNextP(currentP, lastQ, imgAry);
             currentP.row = -currentP.row;
             currentP.col = -currentP.col;
@@ -163,17 +157,9 @@ class ChainCode{
                 debugCount = 0;
             }
 
-
             lastQ = zeroTable[(pChainDir+7) % 8];
             currentP.row = nextP.row;
             currentP.col = nextP.col;
-
-            cout << "currentP: row = " << currentP.row << " col = " << currentP.col << endl;
-            cout << "startP: row = " << startP.row << " col = " << startP.col << endl;
-
-            cout << "the while loop: " << ((currentP.row != startP.row) || (currentP.col != startP.col)) << endl;
-            
-
         }
 
         ChainCodeFile << endl;
@@ -268,8 +254,7 @@ class ChainCode{
 
     void prettyPrint(ofstream& outFile){
 
-    }
-
+    } // Not called?
 
 };
 
@@ -294,9 +279,7 @@ int main(int argc, char* argv[]){
     int label, numPixels, minRow, minCol, maxRow, maxCol;
 
     // StartOfLoop
-
     while(proccessedCC < totalCC){
-        cout << "**************************************proccessedCC: " << proccessedCC << endl;
         propFile >> label; 
         propFile >> numPixels; 
         propFile >> minRow; 
@@ -304,49 +287,14 @@ int main(int argc, char* argv[]){
         propFile >> maxRow;
         propFile >> maxCol;
         connectCC CC(label, numPixels, minRow, minCol, maxRow, maxCol);
-        cout << CC.label << " " << CC.numPixels << " " << CC.minRow << " " << CC.minCol << " " << CC.maxRow << " " << CC.maxCol << endl;
-
         CC.clearCC(image.CCAry, image.numRows, image.numCols);
-
-        
         CC.loadCC(image.imgAry, image.CCAry);
 
         
         ChainCode chainCode;
-        
-
         chainCode.getChainCode(CC, image.CCAry, image.imgAry, ChainCodeFile, debugFile);
-        
         proccessedCC++;
-
-
     }
-
-
-    
-    
-    
-
-    //DEBUGSTUFF
-    // for(int i = 0; i < image.numRows+2; i++){
-    //         for(int j = 0; j < image.numCols+2; j++){
-    //             cout << image.CCAry[i][j] << " ";
-    //         }
-    //         cout << endl;
-    //     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     labelFile.close();
     propFile.close();
