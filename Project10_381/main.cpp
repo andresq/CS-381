@@ -79,8 +79,8 @@ class connectCC{
     }
 
     void loadCC(int** imgAry, int** CCAry){
-        for(int i = minRow+1; i < maxRow+2; i++){
-            for(int j= minCol+1; j < maxCol+2; j++){
+        for(int i = minRow; i < maxRow+2; i++){
+            for(int j= minCol; j < maxCol+2; j++){
                 if(imgAry[i][j] > 0){
                     CCAry[i][j] = label;
                 }
@@ -99,6 +99,13 @@ class ChainCode{
             row = x;
             col = y;
         }
+
+        bool isEqual(Point& second){
+            bool rowEqual, colEqual;
+            rowEqual = this->row == second.row;
+            colEqual = this->col == second.col;
+            return rowEqual && colEqual;
+        }
     };
 
     Point neighborCoord[8] = {Point(-1,-1), Point(-1,-1), Point(-1,-1), Point(-1,-1), Point(-1,-1), Point(-1,-1), Point(-1,-1), Point(-1,-1) };
@@ -114,42 +121,135 @@ class ChainCode{
 
     }
 
-    void getChainCode(connectCC CC, int** CCAry, ofstream& ChainCodeFile, ofstream& debugFile){
+    void getChainCode(connectCC CC, int** CCAry, int** imgAry, ofstream& ChainCodeFile, ofstream& debugFile){
         int label = CC.label;
+        bool found = false;
+        
         
         for(int iRow = CC.minRow+1; iRow < CC.maxRow+2; iRow++){
             for(int jCol = CC.minCol+1; jCol < CC.maxCol+2; jCol++){
-                if(CCAry[iRow][jCol] == label){
+                if(CCAry[iRow][jCol] == label && !found){
                     ChainCodeFile << label << " " << iRow << " " << jCol << " " << CCAry[iRow][jCol];
                     debugFile     << label << " " << iRow << " " << jCol << " " << CCAry[iRow][jCol];
                     startP = Point(iRow, jCol);
                     currentP = Point(iRow, jCol);
                     lastQ = 4;
+                    found = true;
+
+                    //DEBUGSTUFF
+                    // debugFile << "Starting a new CC" << endl;
                 }
-
-                int nextQ = (lastQ+1) % 8;
-
-                pChainDir = findNextP(currentP, nextQ, nextP);
-
-
-
-
-
-
-
-
             }
         }
+
+        int debugCount = 0;
+        int doOnce = 1;
+        int nextQ;
+
+        while(doOnce > 0 ||  !(currentP.isEqual(startP))   ){
+            doOnce = 0;
+
+            
+
+            pChainDir = findNextP(currentP, lastQ, imgAry);
+            currentP.row = -currentP.row;
+            currentP.col = -currentP.col;
+
+            ChainCodeFile << pChainDir;
+            debugFile << pChainDir << " ";
+
+            if(++debugCount == 20){
+                debugFile << endl;
+                debugCount = 0;
+            }
+
+
+            lastQ = zeroTable[(pChainDir+7) % 8];
+            currentP.row = nextP.row;
+            currentP.col = nextP.col;
+
+            cout << "currentP: row = " << currentP.row << " col = " << currentP.col << endl;
+            cout << "startP: row = " << startP.row << " col = " << startP.col << endl;
+
+            cout << "the while loop: " << ((currentP.row != startP.row) || (currentP.col != startP.col)) << endl;
+            
+
+        }
+
+        ChainCodeFile << endl;
+        debugFile << endl;
     }
 
-    int findNextP(Point currentP, int nextQ, Point nextP){
+    int findNextP(Point currentP, int lastQ, int** imgAry){
         loadNeighborCoord(currentP);
-        int chainDir = -1;
-        
+        int chainDir = ++lastQ;
+        int loop = 0;
 
-
-
-        return -33;
+        int i = currentP.row, j = currentP.col;
+        while(loop < 8){
+            
+            switch(chainDir){
+                case 0:
+                    if(imgAry[i][j+1] > 0){
+                        chainDir = 0;
+                        nextP = neighborCoord[chainDir];
+                        return chainDir;
+                    }
+                    break;
+                case 1:
+                    if(imgAry[i-1][j+1] > 0){
+                        chainDir = 1;
+                        nextP = neighborCoord[chainDir];
+                        return chainDir;
+                    }
+                    break;
+                case 2:
+                    if(imgAry[i-1][j] > 0){
+                        chainDir = 2;
+                        nextP = neighborCoord[chainDir];
+                        return chainDir;
+                    }
+                    break;
+                case 3:
+                    if(imgAry[i-1][j-1] > 0){
+                        chainDir = 3;
+                        nextP = neighborCoord[chainDir];
+                        return chainDir;
+                    }
+                    break;
+                case 4:
+                    if(imgAry[i][j-1] > 0){
+                        chainDir = 4;
+                        nextP = neighborCoord[chainDir];
+                        return chainDir;
+                    }
+                    break;
+                case 5:
+                    if(imgAry[i+1][j-1] > 0){
+                        chainDir = 5;
+                        nextP = neighborCoord[chainDir];
+                        return chainDir;
+                    }
+                    break;
+                case 6:
+                    if(imgAry[i+1][j] > 0){
+                        chainDir = 6;
+                        nextP = neighborCoord[chainDir];
+                        return chainDir;
+                    }
+                    break;
+                case 7:
+                    if(imgAry[i+1][j+1] > 0){
+                        chainDir = 7;
+                        nextP = neighborCoord[chainDir];
+                        return chainDir;
+                    }
+                    break;
+            }
+            chainDir = (chainDir+1) % 8;
+            loop++;
+        }
+        return -1;
     }
 
     void loadNeighborCoord(Point p){
@@ -184,37 +284,48 @@ int main(int argc, char* argv[]){
     debugFile << image.numRows << " " << image.numCols << " " << image.minVal << " " << image.maxVal << endl;
     image.loadImage(labelFile);
 
-    //DEBUGSTUFF
-    // for(int i = 0; i < image.numRows+2; i++){
-    //         for(int j = 0; j < image.numCols+2; j++){
-    //             cout << image.CCAry[i][j] << " ";
-    //         }
-    //         cout << endl;
-    //     }
-
     int dummyRead; // to get the correct spot
     propFile >> dummyRead; propFile >> dummyRead; propFile >> dummyRead; propFile >> dummyRead; // imageHeader
+
     int totalCC;
-    propFile >> totalCC; // Is this used?
+    int proccessedCC = 0;
+    propFile >> totalCC;
 
     int label, numPixels, minRow, minCol, maxRow, maxCol;
 
     // StartOfLoop
 
+    while(proccessedCC < totalCC){
+        cout << "**************************************proccessedCC: " << proccessedCC << endl;
+        propFile >> label; 
+        propFile >> numPixels; 
+        propFile >> minRow; 
+        propFile >> minCol;
+        propFile >> maxRow;
+        propFile >> maxCol;
+        connectCC CC(label, numPixels, minRow, minCol, maxRow, maxCol);
+        cout << CC.label << " " << CC.numPixels << " " << CC.minRow << " " << CC.minCol << " " << CC.maxRow << " " << CC.maxCol << endl;
+
+        CC.clearCC(image.CCAry, image.numRows, image.numCols);
+
+        
+        CC.loadCC(image.imgAry, image.CCAry);
+
+        
+        ChainCode chainCode;
+        
+
+        chainCode.getChainCode(CC, image.CCAry, image.imgAry, ChainCodeFile, debugFile);
+        
+        proccessedCC++;
+
+
+    }
+
 
     
-
-    propFile >> label; 
-    propFile >> numPixels; 
-    propFile >> minRow; 
-    propFile >> minCol;
-    propFile >> maxRow;
-    propFile >> maxCol;
-    connectCC CC(label, numPixels, minRow, minCol, maxRow, maxCol);
-    // cout << CC.label << " " << CC.numPixels << " " << CC.minRow << " " << CC.minCol << " " << CC.maxRow << " " << CC.maxCol << endl;
-
-    CC.clearCC(image.CCAry, image.numRows, image.numCols);
-    CC.loadCC(image.imgAry, image.CCAry);
+    
+    
 
     //DEBUGSTUFF
     // for(int i = 0; i < image.numRows+2; i++){
