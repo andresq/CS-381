@@ -8,3 +8,4 @@
 * Project 7: Distance Transforming
 * Project 8: Thinning
 * Project 9: Hough Transform
+* Project 10: Chain Code
