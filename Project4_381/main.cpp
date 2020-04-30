@@ -211,6 +211,7 @@ void dilation(int i, int j, int** morphAry, int rowOrigin, int colOrigin){
       morphAry[i-a][j-b] = 1;
     }
   }
+  //before i,j
   for(int a = 0; a < rowOrigin+1; a++){
     for(int b = 0; b < colOrigin+1; b++){
       morphAry[i+a][j+b] = 1;
