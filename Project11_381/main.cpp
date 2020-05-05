@@ -77,6 +77,19 @@ class imagePP{
         }
     }
 
+    void computeHPP(){
+        int sum = 0;
+        for(int row = 0; row < numRows+2; row++){
+            for(int col = 0 ; col < numCols+2; col++){
+                if(imgAry[row][col] > 0){
+                    sum++;
+                }
+            }
+            HPP[row] = sum;
+            sum = 0;
+        }
+    }
+
 };
 
 
@@ -122,6 +135,20 @@ int main(int argc, char* argv[]){
 
     // Load image to imageAry
     image.loadImage(inFile);
+
+
+    // Compute HPP
+    image.computeHPP();
+
+
+    for(int i = 0; i < image.numRows+2;i++){
+        cout << image.HPP[i] << " ";
+    }
+
+    cout << endl;
+    cout << endl;
+    cout << endl;
+
 
 
 
