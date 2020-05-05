@@ -46,6 +46,7 @@ class imagePP{
     int* HPPbin;
     int* VPPbin;
 
+    int structElement [3] = {1,1,1};
     int* HPPMorph;
     int* VPPMorph;
 
@@ -101,6 +102,34 @@ class imagePP{
             VPP[col] = sum;
             sum = 0;
         }
+    }
+
+    void threshold(){
+        // HPPbin
+        for(int i = 0; i < numRows+2; i++){
+            if(HPP[i] < thresholdVal){
+                HPPbin[i] = 0;
+            } else {
+                HPPbin[i] = 1;
+            }
+        }
+
+
+        // VPPbin
+        for(int i = 0; i < numCols+2; i++){
+            if(VPP[i] < thresholdVal){
+                VPPbin[i] = 0;
+            } else {
+                VPPbin[i] = 1;
+            }
+        }
+    }
+
+
+    // Dilation then Erosion
+    void closingOperatation(int* PP, int* PPMorph){
+        // Dilation
+
     }
 
 };
@@ -169,10 +198,28 @@ int main(int argc, char* argv[]){
     }
     outFile2 << endl;
 
+    // Thesholding to create HPPbin & VPPbin
+    image.threshold();
+
+
+    // Output HPPbin, VPPbin to outFile2 with captions
+    outFile2 << "HPPbin:" << endl;
+    for(int i = 0; i < image.numRows+2;i++){
+        outFile2 << image.HPPbin[i] << " ";
+    }
+    outFile2 << endl;
+    outFile2 << "VPPbin:" << endl;
+    for(int i = 0; i < image.numCols+2;i++){
+        outFile2 << image.VPPbin[i] << " ";
+    }
+    outFile2 << endl;
 
 
 
 
+
+
+
     
     
     
@@ -180,7 +227,9 @@ int main(int argc, char* argv[]){
     
     
     
-    
+    // for(int i = 0; i < 3; i++){
+    //     cout << image.structElement[i] << endl;
+    // }
     
     
     
@@ -192,13 +241,15 @@ int main(int argc, char* argv[]){
     //     cout << image.VPPbin[i];
     // }
     //     cout << endl;
+
+
     // PRINTS IMAGE ARRAY with frame
-    for(int i = 0; i < image.numRows+2; i++){
-        for( int j = 0; j < image.numCols+2; j++){
-            cout << image.imgAry[i][j];
-        }
-        cout << endl;
-    }
+    // for(int i = 0; i < image.numRows+2; i++){
+    //     for( int j = 0; j < image.numCols+2; j++){
+    //         cout << image.imgAry[i][j];
+    //     }
+    //     cout << endl;
+    // }
 
 
     
