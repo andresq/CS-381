@@ -4,5 +4,7 @@
 *.zip
 *.class
 *.out
+*.png
+*.jpg
 .DS_Store
 .DS_Store?
