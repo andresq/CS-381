@@ -66,6 +66,17 @@ class imagePP{
         }
     }
 
+    void loadImage(ifstream& inFile){
+        int value;
+        
+        for(int i = 1; i < numRows+1; i++){
+            for(int j= 1; j < numCols+1; j++){
+                inFile >> value;
+                imgAry[i][j] = value;
+            }
+        }
+    }
+
 };
 
 
@@ -92,12 +103,14 @@ int main(int argc, char* argv[]){
 
     image.thresholdVal = inputThreshold;
 
+    // Size to numRows+2, numCols+2
     image.HPP = new int[image.numRows+2];
     image.VPP = new int[image.numCols+2];
 
     image.HPPbin = new int[image.numRows+2];
     image.VPPbin = new int[image.numCols+2];
 
+    // Init to zero
     for(int i = 0; i < image.numRows+2; i++){
         image.HPP[i] = 0;
         image.HPPbin[i] = 0;
@@ -107,6 +120,10 @@ int main(int argc, char* argv[]){
         image.VPPbin[i] = 0;
     }
 
+    // Load image to imageAry
+    image.loadImage(inFile);
+
+
 
     
     
@@ -119,15 +136,15 @@ int main(int argc, char* argv[]){
     
     
     
-    for(int i = 0; i < image.numCols+2; i++){
-        cout << image.VPP[i];
-    }
-        cout << endl;
-    for(int i = 0; i < image.numCols+2; i++){
-        cout << image.VPPbin[i];
-    }
-        cout << endl;
-    // PRINTS IMAGE ARRAY
+    // for(int i = 0; i < image.numCols+2; i++){
+    //     cout << image.VPP[i];
+    // }
+    //     cout << endl;
+    // for(int i = 0; i < image.numCols+2; i++){
+    //     cout << image.VPPbin[i];
+    // }
+        // cout << endl;
+    // PRINTS IMAGE ARRAY with frame
     for(int i = 0; i < image.numRows+2; i++){
         for( int j = 0; j < image.numCols+2; j++){
             cout << image.imgAry[i][j];
