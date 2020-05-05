@@ -90,6 +90,19 @@ class imagePP{
         }
     }
 
+    void computeVPP(){
+        int sum = 0;
+        for(int col = 0; col < numCols+2; col++){
+            for(int row = 0; row < numRows+2; row++){
+                if(imgAry[row][col] > 0){
+                    sum++;
+                }
+            }
+            VPP[col] = sum;
+            sum = 0;
+        }
+    }
+
 };
 
 
@@ -140,14 +153,22 @@ int main(int argc, char* argv[]){
     // Compute HPP
     image.computeHPP();
 
+    // Compute VPP
+    image.computeVPP();
 
+
+    // Output HPP, VPP to outFile2 with captions
+    outFile2 << "HPP:" << endl;
     for(int i = 0; i < image.numRows+2;i++){
-        cout << image.HPP[i] << " ";
+        outFile2 << image.HPP[i] << " ";
     }
+    outFile2 << endl;
+    outFile2 << "VPP:" << endl;
+    for(int i = 0; i < image.numCols+2;i++){
+        outFile2 << image.VPP[i] << " ";
+    }
+    outFile2 << endl;
 
-    cout << endl;
-    cout << endl;
-    cout << endl;
 
 
 
@@ -170,7 +191,7 @@ int main(int argc, char* argv[]){
     // for(int i = 0; i < image.numCols+2; i++){
     //     cout << image.VPPbin[i];
     // }
-        // cout << endl;
+    //     cout << endl;
     // PRINTS IMAGE ARRAY with frame
     for(int i = 0; i < image.numRows+2; i++){
         for( int j = 0; j < image.numCols+2; j++){
