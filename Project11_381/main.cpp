@@ -52,15 +52,93 @@ class imagePP{
     int HPPruns;
     int VPPruns;
 
+    // Methods
+
+    void zeroFrame(){
+        for(int row = 0; row < numRows+2; row++){
+            imgAry[row][0] = 0;
+            imgAry[row][numCols+1] = 0;
+        }
+
+        for(int col = 0; col < numCols+2; col++){
+            imgAry[0][col] = 0;
+            imgAry[numRows+1][col] = 0;
+        }
+    }
+
 };
 
 
 
 int main(int argc, char* argv[]){
     ifstream inFile(argv[1]);
-    ofstream outFile1(argv[2]);
-    ofstream outFile2(argv[3]);
+    int inputThreshold = stoi(argv[2]);
+    ofstream outFile1(argv[3]);
+    ofstream outFile2(argv[4]);
 
+
+    imagePP image;
+    inFile >> image.numRows;
+    inFile >> image.numCols;
+    inFile >> image.minVal;
+    inFile >> image.maxVal;
+
+    image.imgAry = new int*[image.numRows+2];
+    for(int i = 0; i < image.numRows+2;i++){
+        image.imgAry[i] = new int[image.numCols+2];
+    }
+
+    image.zeroFrame();
+
+    image.thresholdVal = inputThreshold;
+
+    image.HPP = new int[image.numRows+2];
+    image.VPP = new int[image.numCols+2];
+
+    image.HPPbin = new int[image.numRows+2];
+    image.VPPbin = new int[image.numCols+2];
+
+    for(int i = 0; i < image.numRows+2; i++){
+        image.HPP[i] = 0;
+        image.HPPbin[i] = 0;
+    }
+    for(int i = 0; i < image.numCols+2; i++){
+        image.VPP[i] = 0;
+        image.VPPbin[i] = 0;
+    }
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    for(int i = 0; i < image.numCols+2; i++){
+        cout << image.VPP[i];
+    }
+        cout << endl;
+    for(int i = 0; i < image.numCols+2; i++){
+        cout << image.VPPbin[i];
+    }
+        cout << endl;
+    // PRINTS IMAGE ARRAY
+    for(int i = 0; i < image.numRows+2; i++){
+        for( int j = 0; j < image.numCols+2; j++){
+            cout << image.imgAry[i][j];
+        }
+        cout << endl;
+    }
+
+
+    
+
+    
 
 
 
