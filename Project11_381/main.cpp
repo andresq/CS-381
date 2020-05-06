@@ -127,9 +127,49 @@ class imagePP{
 
 
     // Dilation then Erosion
-    void closingOperatation(int* PP, int* PPMorph){
+    void closingHPPbin(){
+        int* temp = new int[numRows+2];
         // Dilation
+        for(int i = 1; i < numRows+1; i++){
+            if(HPPbin[i] == 1){
+                temp[i-1] = structElement[0];
+                temp[i] = structElement[1];
+                temp[i+1] = structElement[2];
+            }
+        }
 
+        // Erosion
+        for(int i = 1; i < numRows+1; i++){
+            if(temp[i] == structElement[1]){
+                if((temp[i-1] == structElement[0]) && (temp[i+1] == structElement[2])){
+                    HPPMorph[i] = 1;
+                }
+            }
+        }
+
+        delete[] temp;
+    }
+
+    void closingVPPbin(){
+        int* temp = new int[numCols+2];
+        // Dilation
+        for(int i = 1; i < numCols+1; i++){
+            if(VPPbin[i] == 1){
+                temp[i-1] = structElement[0];
+                temp[i] = structElement[1];
+                temp[i+1] = structElement[2];
+            }
+        }
+
+        // Erosion
+        for(int i = 1; i < numCols+1; i++){
+            if(temp[i] == structElement[1]){
+                if((temp[i-1] == structElement[0]) && (temp[i+1] == structElement[2])){
+                    VPPMorph[i] = 1;
+                }
+            }
+        }
+        delete[] temp;
     }
 
 };
@@ -165,14 +205,19 @@ int main(int argc, char* argv[]){
     image.HPPbin = new int[image.numRows+2];
     image.VPPbin = new int[image.numCols+2];
 
+    image.HPPMorph = new int[image.numRows+2];
+    image.VPPMorph = new int[image.numCols+2];
+
     // Init to zero
     for(int i = 0; i < image.numRows+2; i++){
         image.HPP[i] = 0;
         image.HPPbin[i] = 0;
+        image.HPPMorph[i] = 0;
     }
     for(int i = 0; i < image.numCols+2; i++){
         image.VPP[i] = 0;
         image.VPPbin[i] = 0;
+        image.VPPMorph[i] = 0;
     }
 
     // Load image to imageAry
@@ -215,8 +260,11 @@ int main(int argc, char* argv[]){
     outFile2 << endl;
 
 
+    // Creating HPPMorph
+    image.closingHPPbin();
 
-
+    // Creating VPPMorph
+    image.closingVPPbin();
 
 
 
@@ -233,12 +281,12 @@ int main(int argc, char* argv[]){
     
     
     
-    // for(int i = 0; i < image.numCols+2; i++){
-    //     cout << image.VPP[i];
+    // for(int i = 0; i < image.numRows+2; i++){
+    //     cout << image.HPPMorph[i];
     // }
     //     cout << endl;
     // for(int i = 0; i < image.numCols+2; i++){
-    //     cout << image.VPPbin[i];
+    //     cout << image.VPPMorph[i];
     // }
     //     cout << endl;
 
