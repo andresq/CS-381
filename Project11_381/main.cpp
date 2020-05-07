@@ -3,7 +3,6 @@
 #include <fstream>
 using namespace std;
 
-
 // Data stuctures
 class imagePP{
     public:
@@ -25,17 +24,22 @@ class imagePP{
         int boxType; // 1=doc box, 2=paragraph, 3= textLine
         box BBOX;
         boxNode* next;
+
+        boxNode(){
+            boxType = -99;
+            next = NULL;
+        }
     };
 
     class boxQ{
         public:
-        boxNode* Qfront;
-        boxNode* Qback;
+        boxNode* Qfront = new boxNode();
+        boxNode* Qback = Qfront;
         void insert(boxNode* newBoxNode){
             Qback->next = newBoxNode;
             Qback = newBoxNode;
         }
-    };
+    } Queue;
 
     int** imgAry;
     int thresholdVal;
@@ -52,6 +56,8 @@ class imagePP{
 
     int HPPruns;
     int VPPruns;
+
+    bool isHorizontal = false;
 
     // Methods
 
@@ -172,6 +178,274 @@ class imagePP{
         delete[] temp;
     }
 
+    int computeRuns(int* Ary, int sizeOfAry){
+        int count = 1;
+        int currentVal = Ary[0];
+
+        for(int i = 1; i < sizeOfAry; i++){
+            if(Ary[i] != currentVal){
+                count++;
+                currentVal = Ary[i];
+            }
+        }
+        return count;
+    }
+
+    string computeDirection(){
+        if(HPPruns >= 3 * VPPruns){
+            isHorizontal = true;
+            return "horizontal";
+        } else if(VPPruns >= 3 * HPPruns){
+            isHorizontal = false;
+            return "vertical";
+        } else {
+            cout << "Can not determine the reading direction" << endl;
+            exit(1);
+        }
+    }
+
+    void createPageBoundingBox(){
+        boxNode* pageBox = new boxNode();
+        pageBox->boxType = 1;
+
+        int startHPP, startVPP;
+        int endHPP, endVPP;
+        
+        // Finding StartHPP and StartVPP (first 1 in each array);
+        for(int i = 0; i < numRows+2; i++){
+            if(HPPMorph[i] ==1){
+                startHPP = i;
+                break;
+            }
+        }
+
+        
+        for(int i = 0; i < numCols+2; i++){
+            if(VPPMorph[i] ==1){
+                startVPP = i;
+                break;
+            }
+        }
+
+        // Finding endHPP, endVPP (last 1 in each array)
+        for(int i = numRows+1; i >= 0; i--){
+            if(HPPMorph[i] == 1){
+                endHPP = i;
+                break;
+            }
+        }
+
+             
+        for(int i = numCols+1; i >= 0; i--){
+            if(VPPMorph[i] == 1){
+                endVPP = i;
+                break;
+            }
+        }
+
+        
+
+        if(isHorizontal){
+            pageBox->BBOX.minR = startHPP;
+            pageBox->BBOX.minC = startVPP;
+            pageBox->BBOX.maxR = endHPP;
+            pageBox->BBOX.maxC = endVPP;
+        } else {
+            pageBox->BBOX.minR = startVPP;
+            pageBox->BBOX.minC = startHPP;
+            pageBox->BBOX.maxR = endVPP;
+            pageBox->BBOX.maxC = endHPP;
+        }
+
+
+        Queue.insert(pageBox);
+
+    }
+
+    void findLineBoxes(){
+        int reader = 0;
+        int startIndex = -1;
+        int endIndex = -1;
+
+        if(isHorizontal){
+            int startVPP, endVPP;
+            for(int i = 0; i < numCols+2; i++){
+                if(VPPMorph[i] ==1){
+                    startVPP = i;
+                    break;
+                }
+            }
+            for(int i = numCols+1; i >= 0; i--){
+                if(VPPMorph[i] == 1){
+                    endVPP = i;
+                    break;
+                }
+            }   
+            while (reader < numRows+2 ){
+                startIndex = findStart(HPPMorph, reader, numRows+2);
+                endIndex = findEnd(HPPMorph, startIndex, numRows+2);
+
+                if(startIndex != endIndex){
+                    boxNode* newNode = new boxNode();
+                    newNode->boxType = 3;
+                    newNode->BBOX.minR = startIndex;
+                    newNode->BBOX.minC = startVPP;
+                    newNode->BBOX.maxR = endIndex;
+                    newNode->BBOX.maxC = endVPP;
+
+                    Queue.insert(newNode);
+                }
+                
+
+                reader = endIndex+1;
+            }
+
+
+            boxNode* newNode = new boxNode();
+                    newNode->boxType = 3;
+                    newNode->BBOX.minR = startIndex;
+                    newNode->BBOX.minC = startVPP;
+                    newNode->BBOX.maxR = endIndex;
+                    newNode->BBOX.maxC = endVPP;
+
+                    Queue.insert(newNode);
+
+
+        } else {
+            int startHPP, endHPP;
+            for(int i = 0; i < numRows+2; i++){
+                if(HPPMorph[i] == 1){
+                    startHPP = i;
+                    break;
+                }
+            }
+            for(int i = numRows+1; i >= 0; i--){
+                if(HPPMorph[i] == 1){
+                    endHPP = i;
+                    break;
+                }
+            }  
+
+
+            while (reader < numCols+2 ){
+                startIndex = findStart(VPPMorph, reader, numCols+2);
+                endIndex = findEnd(VPPMorph, startIndex, numCols+2);
+
+                if(startIndex != endIndex){
+                    boxNode* newNode = new boxNode();
+                    newNode->boxType = 3;
+                    newNode->BBOX.minR = startHPP;
+                    newNode->BBOX.minC = startIndex;;
+                    newNode->BBOX.maxR = endHPP;
+                    newNode->BBOX.maxC = endIndex;;
+
+                    Queue.insert(newNode);
+                }
+                
+
+                reader = endIndex+1;
+            }
+
+            boxNode* newNode = new boxNode();
+                    newNode->boxType = 3;
+                    newNode->BBOX.minR = startHPP;
+                    newNode->BBOX.minC = startIndex;;
+                    newNode->BBOX.maxR = endHPP;
+                    newNode->BBOX.maxC = endIndex;;
+
+                    Queue.insert(newNode);
+
+
+
+        }
+    }
+
+
+    int findStart(int* Ary, int reader, int size){
+        int index = reader;
+        for(int i = reader; i < size; i++){
+            if(Ary[i] == 1){
+                return i;
+            }
+        }
+
+        return size-1;
+    }
+
+    int findEnd(int* Ary, int startIndex, int size){
+        int lastOne = startIndex;
+        for(int i = startIndex+1; i < size; i++){
+            if(Ary[i] == 0){
+                return lastOne;
+            } else {
+                lastOne++;
+            }
+        }
+
+        return size-1;
+    }
+
+
+    void drawBoxes(){
+        boxNode* spot = Queue.Qfront->next;
+
+        while(spot->next != NULL){
+            // offset needed
+            int startR = spot->BBOX.minR - 2;
+            int startC = spot->BBOX.minC - 2;
+            int endR = spot->BBOX.maxR - 2;
+            int endC = spot->BBOX.maxC - 2;
+            int boxType = spot->boxType;
+
+            // Only write if its a ZERO
+            // for(int i = startR; i < endR; i++){
+            //     if(imgAry[i][startC] == 0)imgAry[i][startC] = boxType;
+            //     if(imgAry[i][endC] == 0)  imgAry[i][endC] = boxType;
+            // }
+
+            // for(int i = startC; i < endC; i++){
+            //     if(imgAry[startR][i] == 0) imgAry[startR][i] = boxType;
+            //     if(imgAry[endR][i] == 0) imgAry[endR][i] = boxType;
+            // }
+            
+            //Overwrites no matter what
+            for(int i = startR; i < endR; i++){
+                imgAry[i][startC] = boxType;
+                imgAry[i][endC] = boxType;
+            }
+
+            for(int i = startC; i < endC; i++){
+                imgAry[startR][i] = boxType;
+                imgAry[endR][i] = boxType;
+            }
+                spot = spot->next;
+        }
+
+    }
+
+    void prettyPrint(ofstream& outFile){
+        for(int i = 0; i < numRows+2; i++){
+            for( int j = 0; j < numCols+2; j++){
+                if(imgAry[i][j] != 0){
+                    outFile << imgAry[i][j] << " ";
+                } else {
+                    outFile << "  ";
+                }
+            }
+            outFile << endl;
+        }
+    }
+
+    void printQueue(ofstream& outFile){
+        boxNode* spot = Queue.Qfront->next;
+        while(spot->next != NULL){
+            outFile << spot->boxType << endl;
+            outFile << spot->BBOX.minR << " " << spot->BBOX.minC << " " << spot->BBOX.maxR << " " << spot->BBOX.maxC << endl;
+            spot = spot->next;
+
+        }
+    }
+
 };
 
 
@@ -266,51 +540,30 @@ int main(int argc, char* argv[]){
     // Creating VPPMorph
     image.closingVPPbin();
 
+    // Compute HPPruns;
+    image.HPPruns = image.computeRuns(image.HPPMorph, image.numRows+2);
+    // Compute VPPruns;
+    image.VPPruns = image.computeRuns(image.VPPMorph, image.numCols+2);
+
+    // Output reading direction to outFile2
+    outFile2 << "Reading Direction: " << endl;
+    outFile2 << image.computeDirection() << endl;
 
 
-    
-    
-    
-    
-    
-    
-    
-    // for(int i = 0; i < 3; i++){
-    //     cout << image.structElement[i] << endl;
-    // }
-    
-    
-    
-    // for(int i = 0; i < image.numRows+2; i++){
-    //     cout << image.HPPMorph[i];
-    // }
-    //     cout << endl;
-    // for(int i = 0; i < image.numCols+2; i++){
-    //     cout << image.VPPMorph[i];
-    // }
-    //     cout << endl;
+    // BBox around whole page boxType = 1
+    image.createPageBoundingBox();
 
+    // Text - Line Bouding boxes boxType = 3
+    image.findLineBoxes();
 
-    // PRINTS IMAGE ARRAY with frame
-    // for(int i = 0; i < image.numRows+2; i++){
-    //     for( int j = 0; j < image.numCols+2; j++){
-    //         cout << image.imgAry[i][j];
-    //     }
-    //     cout << endl;
-    // }
+    // Draw boxes overwrite last thing
+    image.drawBoxes();
 
+    // prettyPrint to outFile1
+    image.prettyPrint(outFile1);
 
-    
-
-    
-
-
-
-
-
-
-
-
+    // prints to outFile2
+    image.printQueue(outFile2);
 
     inFile.close();
     outFile1.close();
